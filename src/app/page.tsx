@@ -1,65 +1,143 @@
-import Image from "next/image";
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { Navbar } from "@/components/layout/navbar";
+import { StatsCards } from "@/components/player/stats-card";
+import { SearchBar } from "@/components/player/search-bar";
+import { QueueTabs } from "@/components/player/queue-tabs";
+import { PlayerList } from "@/components/player/player-list";
+import { PlayerForm } from "@/components/player/player-form";
+import { DeleteDialog } from "@/components/player/delete-dialog";
+import { Player } from "@/types/player";
+import { usePlayerStore } from "@/store/player-store";
+import { Plus } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function Home() {
+  const [mounted, setMounted] = useState(false);
+  
+  // Modals state
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [playerToEdit, setPlayerToEdit] = useState<Player | null>(null);
+  
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [playerToDelete, setPlayerToDelete] = useState<Player | null>(null);
+
+  const deletePlayer = usePlayerStore((state) => state.deletePlayer);
+
+  // Prevent Next.js hydration issues (Zustand persist reads local storage on mount)
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const handleEditPlayer = (player: Player) => {
+    setPlayerToEdit(player);
+    setIsFormOpen(true);
+  };
+
+  const handleDeletePlayer = (player: Player) => {
+    setPlayerToDelete(player);
+    setIsDeleteOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (playerToDelete) {
+      deletePlayer(playerToDelete.id);
+      setPlayerToDelete(null);
+    }
+  };
+
+  const handleAddPlayerClick = () => {
+    setPlayerToEdit(null);
+    setIsFormOpen(true);
+  };
+
+  if (!mounted) {
+    // Premium Dashboard skeleton loader
+    return (
+      <div className="min-h-screen bg-background text-text-main flex flex-col">
+        <Navbar />
+        <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-8">
+          {/* Stats skeleton */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-28 rounded-2xl border border-border-custom bg-surface animate-pulse" />
+            ))}
+          </div>
+
+          {/* Search bar & Tabs skeleton */}
+          <div className="space-y-4">
+            <div className="h-10 rounded-xl bg-surface animate-pulse w-full max-w-lg" />
+            <div className="h-12 border-b border-border-custom flex gap-8">
+              <div className="h-full w-32 bg-surface/60 animate-pulse" />
+              <div className="h-full w-32 bg-surface/60 animate-pulse" />
+            </div>
+          </div>
+
+          {/* Grid skeleton */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 mt-4">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-44 rounded-2xl border border-border-custom bg-surface animate-pulse" />
+            ))}
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+    <div className="min-h-screen bg-background text-text-main flex flex-col relative pb-20 sm:pb-8">
+      {/* Top Navbar */}
+      <Navbar />
+
+      {/* Main Content Dashboard */}
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-8">
+        {/* Statistics Cards */}
+        <section aria-label="Statistik Antrian">
+          <StatsCards />
+        </section>
+
+        {/* Filter and Search controls */}
+        <section aria-label="Kontrol Pencarian dan Urutan" className="space-y-4">
+          <SearchBar />
+          <QueueTabs />
+        </section>
+
+        {/* Player Queue List */}
+        <section aria-label="Daftar Antrian Player">
+          <PlayerList
+            onEditPlayer={handleEditPlayer}
+            onDeletePlayer={handleDeletePlayer}
+            onAddPlayer={handleAddPlayerClick}
+          />
+        </section>
       </main>
+
+      {/* Floating Action Button (Add Player) */}
+      <motion.button
+        whileHover={{ scale: 1.08 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={handleAddPlayerClick}
+        title="Tambah Player"
+        className="fixed bottom-6 right-6 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-brand-primary text-white shadow-xl hover:bg-brand-primary/95 transition-all glow-primary border border-brand-primary/20 cursor-pointer"
+      >
+        <Plus className="h-7 w-7" />
+      </motion.button>
+
+      {/* Add / Edit Player Modal */}
+      <PlayerForm
+        isOpen={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
+        playerToEdit={playerToEdit}
+      />
+
+      {/* Delete Player Dialog */}
+      <DeleteDialog
+        isOpen={isDeleteOpen}
+        onClose={() => setIsDeleteOpen(false)}
+        onConfirm={handleConfirmDelete}
+        playerName={playerToDelete?.playerName || ""}
+      />
     </div>
   );
 }

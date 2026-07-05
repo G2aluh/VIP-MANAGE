@@ -1,26 +1,58 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@theme {
+  --color-background: #09090B;
+  --color-surface: #18181B;
+  --color-card-bg: #27272A;
+  --color-brand-primary: #6366F1;
+  --color-brand-success: #22C55E;
+  --color-brand-danger: #EF4444;
+  --color-text-main: #FAFAFA;
+  --color-text-secondary: #A1A1AA;
+  --color-border-custom: #3F3F46;
+  --font-sans: var(--font-geist-sans), Inter, system-ui, sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-text-main);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar for premium dark-mode dashboard feel */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-custom);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-secondary);
+}
+
+/* Custom animations and styling utilities */
+.glassmorphism {
+  background: rgba(24, 24, 27, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(63, 63, 70, 0.5);
+}
+
+.glow-primary {
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.15);
+}
+
+.glow-success {
+  box-shadow: 0 0 15px rgba(34, 197, 94, 0.15);
 }
