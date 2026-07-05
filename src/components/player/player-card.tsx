@@ -109,7 +109,8 @@ export function PlayerCard({ player, onEdit, onDelete }: PlayerCardProps) {
             onClick={handleIncrement}
             className="flex items-center gap-1.5 rounded-lg bg-brand-success/10 hover:bg-brand-success text-brand-success hover:text-white px-3.5 py-2 text-xs font-bold transition-all border border-brand-success/20 hover:border-brand-success shadow-xs cursor-pointer"
           >
-            <Plus className="h-3.5 w-3.5" /> Main
+            <Plus className="h-3.5 w-3.5" />
+             Main
           </button>
         </div>
       </div>
