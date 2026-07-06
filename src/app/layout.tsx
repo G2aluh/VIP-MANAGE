@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "VIP Mabar Queue Manager - Dashboard Antrian VIP",
+  title: "viporchive - Dashboard Antrian VIP",
   description: "Aplikasi pencatatan antrian mabar VIP yang cepat, responsif, instan, dan mudah digunakan.",
 };
 

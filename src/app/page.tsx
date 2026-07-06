@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/layout/navbar";
 import { StatsCards } from "@/components/player/stats-card";
 import { SearchBar } from "@/components/player/search-bar";
@@ -10,11 +11,14 @@ import { PlayerForm } from "@/components/player/player-form";
 import { DeleteDialog } from "@/components/player/delete-dialog";
 import { Player } from "@/types/player";
 import { usePlayerStore } from "@/store/player-store";
+import { useAuthStore } from "@/store/auth-store";
 import { Plus } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function Home() {
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
+  const { isAuthenticated, user } = useAuthStore();
   
   // Modals state
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -30,29 +34,39 @@ export default function Home() {
     setMounted(true);
   }, []);
 
+  // Redirect check
+  useEffect(() => {
+    if (mounted && !isAuthenticated) {
+      router.push("/login");
+    }
+  }, [mounted, isAuthenticated, router]);
+
   const handleEditPlayer = (player: Player) => {
+    if (user?.role !== "admin") return;
     setPlayerToEdit(player);
     setIsFormOpen(true);
   };
 
   const handleDeletePlayer = (player: Player) => {
+    if (user?.role !== "admin") return;
     setPlayerToDelete(player);
     setIsDeleteOpen(true);
   };
 
   const handleConfirmDelete = () => {
-    if (playerToDelete) {
+    if (playerToDelete && user?.role === "admin") {
       deletePlayer(playerToDelete.id);
       setPlayerToDelete(null);
     }
   };
 
   const handleAddPlayerClick = () => {
+    if (user?.role !== "admin") return;
     setPlayerToEdit(null);
     setIsFormOpen(true);
   };
 
-  if (!mounted) {
+  if (!mounted || !isAuthenticated) {
     // Premium Dashboard skeleton loader
     return (
       <div className="min-h-screen bg-background text-text-main flex flex-col">
@@ -113,16 +127,18 @@ export default function Home() {
         </section>
       </main>
 
-      {/* Floating Action Button (Add Player) */}
-      <motion.button
-        whileHover={{ scale: 1.08 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={handleAddPlayerClick}
-        title="Tambah Player"
-        className="fixed bottom-6 right-6 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-brand-primary text-white shadow-xl hover:bg-brand-primary/95 transition-all glow-primary border border-brand-primary/20 cursor-pointer"
-      >
-        <Plus className="h-7 w-7" />
-      </motion.button>
+      {/* Floating Action Button (Add Player) - Only for Admin */}
+      {user?.role === "admin" && (
+        <motion.button
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleAddPlayerClick}
+          title="Tambah Player"
+          className="fixed bottom-6 right-6 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-brand-primary text-white shadow-xl hover:bg-brand-primary/95 transition-all glow-primary border border-brand-primary/20 cursor-pointer"
+        >
+          <Plus className="h-7 w-7" />
+        </motion.button>
+      )}
 
       {/* Add / Edit Player Modal */}
       <PlayerForm

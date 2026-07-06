@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Player } from "@/types/player";
 import { usePlayerStore } from "@/store/player-store";
+import { useAuthStore } from "@/store/auth-store";
 import { Edit2, Trash2, Plus, Zap, UserCheck, Calendar } from "lucide-react";
 import { formatDateTime } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -15,9 +16,11 @@ interface PlayerCardProps {
 
 export function PlayerCard({ player, onEdit, onDelete }: PlayerCardProps) {
   const incrementPlayCount = usePlayerStore((state) => state.incrementPlayCount);
+  const { user } = useAuthStore();
   const [plusOnes, setPlusOnes] = useState<{ id: number }[]>([]);
 
   const handleIncrement = () => {
+    if (user?.role !== "admin") return;
     incrementPlayCount(player.id);
     const newId = Date.now();
     setPlusOnes((prev) => [...prev, { id: newId }]);
@@ -105,13 +108,22 @@ export function PlayerCard({ player, onEdit, onDelete }: PlayerCardProps) {
             </div>
           </div>
 
-          <button
-            onClick={handleIncrement}
-            className="flex items-center gap-1.5 rounded-lg bg-brand-success/10 hover:bg-brand-success text-brand-success hover:text-white px-3.5 py-2 text-xs font-bold transition-all border border-brand-success/20 hover:border-brand-success shadow-xs cursor-pointer"
-          >
-            <Plus className="h-3.5 w-3.5" />
-             Main
-          </button>
+          {user?.role === "admin" ? (
+            <button
+              onClick={handleIncrement}
+              className="flex items-center gap-1.5 rounded-lg bg-brand-success/10 hover:bg-brand-success text-brand-success hover:text-white px-3.5 py-2 text-xs font-bold transition-all border border-brand-success/20 hover:border-brand-success shadow-xs cursor-pointer"
+            >
+              <Plus className="h-3.5 w-3.5" />
+               Main
+            </button>
+          ) : (
+            <div
+              title="Hanya Admin yang dapat menambah status main"
+              className="flex items-center gap-1.5 rounded-lg bg-border-custom/25 text-text-secondary/40 px-3.5 py-2 text-xs font-bold border border-border-custom/40 cursor-not-allowed select-none"
+            >
+              Main
+            </div>
+          )}
         </div>
       </div>
 
@@ -122,25 +134,27 @@ export function PlayerCard({ player, onEdit, onDelete }: PlayerCardProps) {
           <span>Update: {formatDateTime(player.updatedAt)}</span>
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* Edit Button */}
-          <button
-            onClick={() => onEdit(player)}
-            title="Edit Player"
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-border-custom bg-background text-text-secondary hover:text-brand-primary hover:border-brand-primary/40 transition-colors cursor-pointer"
-          >
-            <Edit2 className="h-3.5 w-3.5" />
-          </button>
+        {user?.role === "admin" && (
+          <div className="flex items-center gap-2">
+            {/* Edit Button */}
+            <button
+              onClick={() => onEdit(player)}
+              title="Edit Player"
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-border-custom bg-background text-text-secondary hover:text-brand-primary hover:border-brand-primary/40 transition-colors cursor-pointer"
+            >
+              <Edit2 className="h-3.5 w-3.5" />
+            </button>
 
-          {/* Delete Button */}
-          <button
-            onClick={() => onDelete(player)}
-            title="Hapus Player"
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-border-custom bg-background text-text-secondary hover:text-brand-danger hover:border-brand-danger/40 transition-colors cursor-pointer"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
-        </div>
+            {/* Delete Button */}
+            <button
+              onClick={() => onDelete(player)}
+              title="Hapus Player"
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-border-custom bg-background text-text-secondary hover:text-brand-danger hover:border-brand-danger/40 transition-colors cursor-pointer"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
       </div>
     </motion.div>
   );
